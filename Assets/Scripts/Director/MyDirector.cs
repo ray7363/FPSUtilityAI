@@ -19,10 +19,9 @@ namespace ZombieFPS
         [SerializeField, Range(0, 1)] private float enemyPressure;
         [SerializeField, Range(0, 1)] private float timeSinceCombat;
         [SerializeField, Range(0, 1)] private float damageTakenRecent;
+        [SerializeField, Range(0, 1)] private float tankSpawnTimer;
 
-        [Header("Misc settings")]
-        private const int EnemyCap = 15;
-        private float time;
+        private const int EnemyCap = 30;
 
         public Dictionary<string, float> Context = new();
 
@@ -36,6 +35,7 @@ namespace ZombieFPS
             Context.Add("EnemyPressure", 0);
             Context.Add("TimeSinceCombat", 0);
             Context.Add("DamageTakenRecent", 0);
+            Context.Add("TankSpawnTimer", 0);
         }
 
         public void Tick(DirectorContext context, DirectorActions actions, float deltaTime)
@@ -47,7 +47,8 @@ namespace ZombieFPS
             Context["EnemyCount"] = Mathf.Clamp01((float)context.CountEnemies() / EnemyCap);
             Context["EnemyPressure"] = Mathf.Clamp01((float)context.CountEnemiesWithin(10f) / EnemyCap);
             Context["TimeSinceCombat"] = Mathf.Clamp01(context.Stats.TimeSinceLastCombat / 30f);
-            Context["DamageTakenRecent"] = Mathf.Clamp01(context.Stats.DamageTakenInLast(5f) / 50f);
+            Context["DamageTakenRecent"] = Mathf.Clamp01(context.Stats.DamageTakenInLast(5f) / 30f);
+            Context["TankSpawnTimer"] = Mathf.Clamp01(Context["TankSpawnTimer"] + Mathf.Min(Time.deltaTime, 0.05f) * paramSpeed);
 
             playerHealth = Context["PlayerHealth"];
             playerAmmo = Context["PlayerAmmo"];
@@ -57,8 +58,14 @@ namespace ZombieFPS
             enemyPressure = Context["EnemyPressure"];
             timeSinceCombat = Context["TimeSinceCombat"];
             damageTakenRecent = Context["DamageTakenRecent"];
+            tankSpawnTimer = Context["TankSpawnTimer"];
 
             var bestAction = ChooseAction();
+            switch (bestAction?.Name)
+            {
+                case "SpawnAmmo":
+                    break;
+            }
         }
 
 
